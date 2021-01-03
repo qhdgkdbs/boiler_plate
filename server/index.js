@@ -4,6 +4,7 @@ const port = 3030
 const { User } = require('./models/User')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
+const { auth } = require('./middleware/auth')
 
 const config = require('./config/key.js')
 
@@ -24,7 +25,7 @@ app.get('/', (req, res) => {
   res.send('Hello 2021')
 })
 
-app.post('/register', (req, res) => {
+app.post('/api/users/register', (req, res) => {
     //회원 가입 할때 필요한 정보들을 cilent에서 가져오면
     //그것들을 데이터 베이스에 넣어주자.
 
@@ -48,7 +49,7 @@ app.post('/register', (req, res) => {
 })
 
 
-app.post('/login', (req, res) => {
+app.post('/api/users/login', (req, res) => {
 
     // db에서 요청한 이메일이 데이터 베이스에 있는지 찾기,
     User.findOne({ email : req.body.email}, (err, user) => {
@@ -84,6 +85,34 @@ app.post('/login', (req, res) => {
 
     })
 
+})
+
+
+app.get('/api/users/auth', auth, (req, res) => {
+    //여기까지 미들웨어를 통과했다는 것은 auth가 True라는 뜻
+    res.status.json({
+        _id : req.user._id,
+        // role 이 0이면 일반 사용자, 1이면 관리자
+        isAdmin : req.user.role === 0 ? false : true,
+        isAuth : true,
+        email : req.user.email,
+        name : req.user.name,
+        lastname : req.user.lastname,
+        role : req.user.role,
+        image : req.user.image 
+    })
+}) 
+
+app.get('/api/auth/logout', auth, (req, res) => {
+
+    User.findOneAndUpdate({ _id : req.user._id},
+        { token : ""}
+        ,(err, user) => {
+            if(err) return res.json({success : false, err})
+            return res.status(200).send({
+                success : true 
+            })
+        })
 })
 
 app.listen(port, () => {
