@@ -93,7 +93,7 @@ app.post('/api/user/login', (req, res) => {
 
 app.get('/api/user/auth', auth, (req, res) => {
     //여기까지 미들웨어를 통과했다는 것은 auth가 True라는 뜻
-    res.status.json({
+    res.status(200).json({
         _id : req.user._id,
         // role 이 0이면 일반 사용자, 1이면 관리자
         isAdmin : req.user.role === 0 ? false : true,
@@ -113,7 +113,7 @@ app.get('/api/auth/logout', auth, (req, res) => {
         ,(err, user) => {
             if(err) return res.json({success : false, err})
             return res.status(200).send({
-                success : true 
+                success : true
             })
         })
 })

@@ -1,8 +1,15 @@
-import axios from 'axios'
+// import axios from 'axios'
+// import { response } from 'express'
 import React, {useState} from 'react'
+import { useDispatch } from 'react-redux'
+import { loginUser } from '../../../_actions/user_action'
+import { withRouter } from 'react-router-dom'
 
-function LoginPage() {
 
+function LoginPage(props) {
+
+    const dispatch = useDispatch() //action을 취하기 위해서
+ 
     const [Email, setEmail] = useState("")
     const [Password, setPassword] = useState("")
 
@@ -13,20 +20,33 @@ function LoginPage() {
     const onPasswordhandler = (event) => {
         setPassword(event.currentTarget.value)
     }    
+
+    const alertFunc = (text) => {
+        alert(text)
+    }
     
     const onSubmitHandler = (event) => {
         event.preventDefault() // 리프레쉬를 막는 것
 
-        console.log("email", Email)
-        console.log("Password", Password)
+        // console.log("email", Email)
+        // console.log("Password", Password)
 
         let body = {
             email : Email,
             password : Password
         }
 
-        axios.post('api/user/login', body)
-        .then(res => console.log(res))
+        dispatch(loginUser(body))
+            .then(response => {
+                if(response.payload.loginSuccess){
+                    // 로그인에 성공하면,
+                    props.history.push('/') //리액트에서 페이지를 이동시키는 법
+                }else{
+                    // 로그인에 실패하면
+                    alertFunc("로그인 실패")
+                }
+            }) //loginUser라는 액션
+ 
 
     }
 
@@ -54,4 +74,4 @@ function LoginPage() {
     )
 }
 
-export default LoginPage
+export default withRouter(LoginPage)
